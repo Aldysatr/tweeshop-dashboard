@@ -17,9 +17,14 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'No path specified' });
   }
 
+  // МойСклад требует формат: 2026-05-01 00:00:00 (с пробелом, не T)
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(queryParams)) {
-    params.append(key, value);
+    if (key === 'momentFrom' || key === 'momentTo') {
+      params.append(key, value.replace('T', ' '));
+    } else {
+      params.append(key, value);
+    }
   }
 
   const queryString = params.toString();
