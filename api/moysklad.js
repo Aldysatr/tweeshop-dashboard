@@ -17,15 +17,12 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'No path specified' });
   }
 
-  // Fix date format: replace T with space for MoySklad API
-  if (queryParams.momentFrom) {
-    queryParams.momentFrom = queryParams.momentFrom.replace('T', ' ');
-  }
-  if (queryParams.momentTo) {
-    queryParams.momentTo = queryParams.momentTo.replace('T', ' ');
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(queryParams)) {
+    params.append(key, value);
   }
 
-  const queryString = new URLSearchParams(queryParams).toString();
+  const queryString = params.toString();
   const url = `https://api.moysklad.ru/api/remap/1.2/${path}${queryString ? '?' + queryString : ''}`;
 
   try {
@@ -36,8 +33,13 @@ export default async function handler(req, res) {
       },
     });
 
-    const data = await response.json();
-    return res.status(response.status).json(data);
+    const text = await response.text();
+    try {
+      const data = JSON.parse(text);
+      return res.status(response.status).json(data);
+    } catch {
+      return res.status(response.status).send(text);
+    }
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
