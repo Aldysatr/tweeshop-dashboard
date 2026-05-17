@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tweeshop — Дашборд</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg: #0a0a0f;
+  --bg2: #13131a;
+  --bg3: #1c1c26;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0f0f5;
+  --text2: #8888a0;
+  --text3: #555568;
+  --accent: #7c5cfc;
+  --accent2: #5c9cfc;
+  --green: #3dd68c;
+  --red: #fc5c5c;
+  --amber: #fcb25c;
+  --font: 'Manrope', sans-serif;
+  --mono: 'Space Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+
+.header {
+  border-bottom: 1px solid var(--border);
+  padding: 1.25rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: rgba(10,10,15,0.9);
+  backdrop-filter: blur(12px);
+  z-index: 100;
+}
+.logo { font-family: var(--mono); font-size: 15px; color: var(--text); letter-spacing: 0.05em; }
+.logo span { color: var(--accent); }
+.period-bar { display: flex; align-items: center; gap: 10px; }
+.period-bar input[type=date] {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 12px;
+  padding: 6px 10px;
+  outline: none;
+}
+.btn {
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 16px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn:hover { opacity: 0.85; }
+.btn.loading { opacity: 0.6; pointer-events: none; }
+
+.status-bar {
+  padding: 0.6rem 2rem;
+  font-size: 11px;
+  color: var(--text3);
+  font-family: var(--mono);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); }
+.dot.ok { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.dot.err { background: var(--red); }
+.dot.spin { background: var(--amber); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+
+.main { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+.metric {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+.metric::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+}
+.metric-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.metric-val { font-size: 24px; font-weight: 700; color: var(--text); line-height: 1; }
+.metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; font-family: var(--mono); }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+.card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 1rem;
+}
+
+.top-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.top-row:last-child { border-bottom: none; }
+.top-rank { width: 18px; color: var(--text3); font-family: var(--mono); font-size: 10px; flex-shrink: 0; }
+.top-name { flex: 1; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-wrap { width: 50px; height: 2px; background: var(--bg3); border-radius: 2px; flex-shrink: 0; }
+.bar-fill { height: 2px; border-radius: 2px; }
+.top-val { font-weight: 600; flex-shrink: 0; font-family: var(--mono); font-size: 11px; }
+.top-sub { color: var(--text3); font-size: 10px; flex-shrink: 0; }
+
+.chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; }
+.empty { text-align: center; padding: 3rem; color: var(--text3); font-size: 13px; }
+.badge { font-size: 10px; padding: 2px 7px; border-radius: 4px; font-family: var(--mono); font-weight: 700; flex-shrink: 0; }
+.badge.green { background: rgba(61,214,140,0.15); color: var(--green); }
+.badge.red { background: rgba(252,92,92,0.15); color: var(--red); }
+.badge.amber { background: rgba(252,178,92,0.15); color: var(--amber); }
+
+@media(max-width: 600px) { .grid2 { grid-template-columns: 1fr; } .main { padding: 1rem; } .header { padding: 1rem; } }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">TWEE<span>SHOP</span> / dashboard</div>
+  <div class="period-bar">
+    <input type="date" id="dateFrom">
+    <input type="date" id="dateTo">
+    <button class="btn" id="loadBtn" onclick="loadData()">Обновить</button>
+  </div>
+</header>
+
+<div class="status-bar">
+  <span class="dot" id="dot"></span>
+  <span id="statusText">Нажми Обновить для загрузки данных</span>
+</div>
+
+<main class="main">
+  <div class="metrics" id="metrics">
+    <div class="metric"><div class="metric-label">Выручка</div><div class="metric-val" id="mRev">—</div><div class="metric-sub" id="mRevSub"></div></div>
+    <div class="metric"><div class="metric-label">Прибыль</div><div class="metric-val" id="mProfit">—</div><div class="metric-sub" id="mProfitSub"></div></div>
+    <div class="metric"><div class="metric-label">Наценка</div><div class="metric-val" id="mMarkup">—</div><div class="metric-sub">средняя по магазину</div></div>
+    <div class="metric"><div class="metric-label">Продано позиций</div><div class="metric-val" id="mQty">—</div><div class="metric-sub" id="mQtySub"></div></div>
+    <div class="metric"><div class="metric-label">Ср. чек товара</div><div class="metric-val" id="mAvg">—</div><div class="metric-sub">тенге</div></div>
+    <div class="metric"><div class="metric-label">Себестоимость</div><div class="metric-val" id="mCost">—</div><div class="metric-sub">вложено в товар</div></div>
+  </div>
+
+  <div class="chart-card">
+    <div class="card-title">Выручка по дням</div>
+    <div style="position:relative;height:200px">
+      <canvas id="chartRevenue" role="img" aria-label="Выручка по дням"></canvas>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Топ товаров — выручка</div>
+      <div id="topRevenue"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Топ товаров — количество</div>
+      <div id="topQty"></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Лучшая наценка %</div>
+      <div id="topMarkup"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Остатки — заканчиваются</div>
+      <div id="lowStock"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+const API = '/api/moysklad';
+
+function fmt(n) { return new Intl.NumberFormat('ru-RU').format(Math.round(n || 0)); }
+function fmtK(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1) + ' млн';
+  if (n >= 1000) return (n/1000).toFixed(0) + ' тыс';
+  return Math.round(n);
+}
+
+function setStatus(cls, text) {
+  document.getElementById('dot').className = 'dot ' + cls;
+  document.getElementById('statusText').textContent = text;
+}
+
+function initDates() {
+  const now = new Date();
+  const from = new Date(now.getFullYear(), now.getMonth(), 1);
+  document.getElementById('dateFrom').value = from.toISOString().slice(0, 10);
+  document.getElementById('dateTo').value = now.toISOString().slice(0, 10);
+}
+
+async function apiFetch(path, params = {}) {
+  const qs = new URLSearchParams({ path, ...params }).toString();
+  const r = await fetch(`${API}?${qs}`);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+let revenueChart = null;
+
+function makeList(elId, items, getRank, getName, getBar, getVal, getSub, getBadge) {
+  const el = document.getElementById(elId);
+  if (!items || !items.length) { el.innerHTML = '<div class="empty">Нет данных</div>'; return; }
+  const maxBar = Math.max(...items.map(getBar));
+  el.innerHTML = items.slice(0, 8).map((item, i) => {
+    const pct = maxBar > 0 ? Math.round(getBar(item) / maxBar * 100) : 0;
+    const badge = getBadge ? getBadge(item) : null;
+    return `<div class="top-row">
+      <span class="top-rank">${getRank(i)}</span>
+      <span class="top-name" title="${getName(item)}">${getName(item)}</span>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:var(--accent)"></div></div>
+      <span class="top-val" style="color:var(--text)">${getVal(item)}</span>
+      ${getSub ? `<span class="top-sub">${getSub(item)}</span>` : ''}
+      ${badge ? `<span class="badge ${badge.cls}">${badge.text}</span>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function loadData() {
+  const from = document.getElementById('dateFrom').value;
+  const to = document.getElementById('dateTo').value;
+  if (!from || !to) { setStatus('err', 'Выбери период'); return; }
+
+  const btn = document.getElementById('loadBtn');
+  btn.classList.add('loading');
+  btn.textContent = 'Загрузка...';
+  setStatus('spin', 'Подключаемся к МойСклад...');
+
+  const fromStr = from + 'T00:00:00';
+  const toStr = to + 'T23:59:59';
+
+  try {
+    setStatus('spin', 'Загружаем прибыльность по товарам...');
+    const [byProduct, byDay, stock] = await Promise.all([
+      apiFetch('report/profit/byproduct', { momentFrom: fromStr, momentTo: toStr, limit: 100 }),
+      apiFetch('report/sales/byday', { momentFrom: fromStr, momentTo: toStr }),
+      apiFetch('report/stock/all', { limit: 50, filter: 'stockMode=positiveOnly' }),
+    ]);
+
+    const rows = byProduct.rows || [];
+
+    let totalRev = 0, totalCost = 0, totalQty = 0;
+    rows.forEach(r => {
+      totalRev += (r.sellSum || 0);
+      totalCost += (r.buySum || 0);
+      totalQty += (r.sellQuantity || 0);
+    });
+
+    // МойСклад возвращает суммы в копейках
+    const div = totalRev > 1000000 ? 100 : 1;
+    totalRev /= div; totalCost /= div;
+    const totalProfit = totalRev - totalCost;
+    const markup = totalCost > 0 ? (totalProfit / totalCost * 100) : 0;
+    const avgPrice = totalQty > 0 ? totalRev / totalQty : 0;
+
+    document.getElementById('mRev').textContent = fmtK(totalRev);
+    document.getElementById('mRevSub').textContent = fmt(totalRev) + ' тг';
+    document.getElementById('mProfit').textContent = fmtK(totalProfit);
+    document.getElementById('mProfitSub').textContent = 'маржа ' + (totalRev > 0 ? (totalProfit/totalRev*100).toFixed(1) : 0) + '%';
+    document.getElementById('mMarkup').textContent = markup.toFixed(0) + '%';
+    document.getElementById('mQty').textContent = fmt(totalQty);
+    document.getElementById('mQtySub').textContent = rows.length + ' уникальных товаров';
+    document.getElementById('mAvg').textContent = fmt(avgPrice);
+    document.getElementById('mCost').textContent = fmtK(totalCost);
+
+    // Chart by day
+    const dayRows = (byDay.rows || []);
+    if (dayRows.length > 0) {
+      const labels = dayRows.map(r => (r.date || '').slice(5, 10));
+      const vals = dayRows.map(r => Math.round((r.revenue || 0) / div));
+      if (revenueChart) revenueChart.destroy();
+      revenueChart = new Chart(document.getElementById('chartRevenue'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Выручка',
+            data: vals,
+            backgroundColor: 'rgba(124,92,252,0.6)',
+            borderColor: 'rgba(124,92,252,1)',
+            borderWidth: 1,
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => fmt(c.raw) + ' тг' } } },
+          scales: {
+            x: { ticks: { color: '#555568', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+            y: { ticks: { color: '#555568', font: { size: 10 }, callback: v => fmtK(v) }, grid: { color: 'rgba(255,255,255,0.04)' } }
+          }
+        }
+      });
+    }
+
+    // Normalize rows
+    const normRows = rows.map(r => ({
+      name: r.assortment?.name || '—',
+      qty: r.sellQuantity || 0,
+      rev: (r.sellSum || 0) / div,
+      cost: (r.buySum || 0) / div,
+      markup: r.buySum > 0 ? ((r.sellSum - r.buySum) / r.buySum * 100) : 0,
+    }));
+
+    // Top by revenue
+    const topRev = [...normRows].sort((a, b) => b.rev - a.rev).slice(0, 8);
+    makeList('topRevenue', topRev,
+      i => i + 1,
+      p => p.name,
+      p => p.rev,
+      p => fmtK(p.rev) + ' ₸',
+      p => p.qty + ' шт',
+      p => {
+        const m = Math.round(p.markup);
+        return m >= 80 ? { cls: 'green', text: m + '%' } : m >= 50 ? { cls: 'amber', text: m + '%' } : { cls: 'red', text: m + '%' };
+      }
+    );
+
+    // Top by qty
+    const topQ = [...normRows].sort((a, b) => b.qty - a.qty).slice(0, 8);
+    makeList('topQty', topQ,
+      i => i + 1,
+      p => p.name,
+      p => p.qty,
+      p => p.qty + ' шт',
+      p => fmtK(p.rev) + ' ₸',
+      null
+    );
+
+    // Top markup
+    const topM = [...normRows].filter(p => p.cost > 0).sort((a, b) => b.markup - a.markup).slice(0, 8);
+    makeList('topMarkup', topM,
+      i => i + 1,
+      p => p.name,
+      p => p.markup,
+      p => Math.round(p.markup) + '%',
+      p => fmtK(p.rev) + ' ₸',
+      null
+    );
+
+    // Low stock
+    const stockRows = (stock.rows || []).filter(r => (r.stock || 0) < 5 && (r.stock || 0) >= 0).slice(0, 8);
+    const stEl = document.getElementById('lowStock');
+    if (stockRows.length) {
+      stEl.innerHTML = stockRows.map((r, i) => `
+        <div class="top-row">
+          <span class="top-rank">${i + 1}</span>
+          <span class="top-name" title="${r.name || '—'}">${r.name || '—'}</span>
+          <span class="badge ${(r.stock || 0) === 0 ? 'red' : 'amber'}">${Math.round(r.stock || 0)} шт</span>
+        </div>`).join('');
+    } else {
+      stEl.innerHTML = '<div class="empty">Всё в норме (>5 шт)</div>';
+    }
+
+    setStatus('ok', 'Данные загружены · ' + from + ' — ' + to);
+
+  } catch (e) {
+    setStatus('err', 'Ошибка: ' + e.message);
+  } finally {
+    btn.classList.remove('loading');
+    btn.textContent = 'Обновить';
+  }
+}
+
+initDates();
+loadData();
+</script>
+</body>
+</html>
