@@ -283,7 +283,7 @@ async function loadData() {
     });
 
     // МойСклад возвращает суммы в копейках
-    const div = totalRev > 1000000 ? 100 : 1;
+    const div = 100;
     totalRev /= div; totalCost /= div;
     const totalProfit = totalRev - totalCost;
     const markup = totalCost > 0 ? (totalProfit / totalCost * 100) : 0;
@@ -303,7 +303,7 @@ async function loadData() {
     const dayRows = (byDay.rows || []);
     if (dayRows.length > 0) {
       const labels = dayRows.map(r => (r.date || '').slice(5, 10));
-      const vals = dayRows.map(r => Math.round((r.revenue || 0) / div));
+      const vals = dayRows.map(r => Math.round((r.revenue || 0) / 100));
       if (revenueChart) revenueChart.destroy();
       revenueChart = new Chart(document.getElementById('chartRevenue'), {
         type: 'bar',
