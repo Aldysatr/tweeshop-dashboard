@@ -12,13 +12,19 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Token not configured' });
   }
 
-  const { path } = req.query;
+  const { path, ...queryParams } = req.query;
   if (!path) {
     return res.status(400).json({ error: 'No path specified' });
   }
 
-  const queryParams = { ...req.query };
-  delete queryParams.path;
+  // Fix date format: replace T with space for MoySklad API
+  if (queryParams.momentFrom) {
+    queryParams.momentFrom = queryParams.momentFrom.replace('T', ' ');
+  }
+  if (queryParams.momentTo) {
+    queryParams.momentTo = queryParams.momentTo.replace('T', ' ');
+  }
+
   const queryString = new URLSearchParams(queryParams).toString();
   const url = `https://api.moysklad.ru/api/remap/1.2/${path}${queryString ? '?' + queryString : ''}`;
 
@@ -26,7 +32,6 @@ export default async function handler(req, res) {
     const response = await fetch(url, {
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Accept-Encoding': 'gzip',
         'Content-Type': 'application/json',
       },
     });
