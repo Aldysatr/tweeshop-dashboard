@@ -26,7 +26,6 @@
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
-
 .header {
   border-bottom: 1px solid var(--border);
   padding: 1.25rem 2rem;
@@ -66,7 +65,6 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
 }
 .btn:hover { opacity: 0.85; }
 .btn.loading { opacity: 0.6; pointer-events: none; }
-
 .status-bar {
   padding: 0.6rem 2rem;
   font-size: 11px;
@@ -82,9 +80,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
 .dot.err { background: var(--red); }
 .dot.spin { background: var(--amber); animation: pulse 1s infinite; }
 @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
-
 .main { padding: 2rem; max-width: 1200px; margin: 0 auto; }
-
 .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
 .metric {
   background: var(--bg2);
@@ -104,31 +100,10 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
 .metric-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
 .metric-val { font-size: 24px; font-weight: 700; color: var(--text); line-height: 1; }
 .metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; font-family: var(--mono); }
-
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
-.card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.25rem;
-}
-.card-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text2);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 1rem;
-}
-
-.top-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 12px;
-}
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+.card-title { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+.top-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
 .top-row:last-child { border-bottom: none; }
 .top-rank { width: 18px; color: var(--text3); font-family: var(--mono); font-size: 10px; flex-shrink: 0; }
 .top-name { flex: 1; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -136,14 +111,12 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
 .bar-fill { height: 2px; border-radius: 2px; }
 .top-val { font-weight: 600; flex-shrink: 0; font-family: var(--mono); font-size: 11px; }
 .top-sub { color: var(--text3); font-size: 10px; flex-shrink: 0; }
-
 .chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; }
 .empty { text-align: center; padding: 3rem; color: var(--text3); font-size: 13px; }
 .badge { font-size: 10px; padding: 2px 7px; border-radius: 4px; font-family: var(--mono); font-weight: 700; flex-shrink: 0; }
 .badge.green { background: rgba(61,214,140,0.15); color: var(--green); }
 .badge.red { background: rgba(252,92,92,0.15); color: var(--red); }
 .badge.amber { background: rgba(252,178,92,0.15); color: var(--amber); }
-
 @media(max-width: 600px) { .grid2 { grid-template-columns: 1fr; } .main { padding: 1rem; } .header { padding: 1rem; } }
 </style>
 </head>
@@ -160,11 +133,11 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
 
 <div class="status-bar">
   <span class="dot" id="dot"></span>
-  <span id="statusText">Нажми Обновить для загрузки данных</span>
+  <span id="statusText">Загружаем данные...</span>
 </div>
 
 <main class="main">
-  <div class="metrics" id="metrics">
+  <div class="metrics">
     <div class="metric"><div class="metric-label">Выручка</div><div class="metric-val" id="mRev">—</div><div class="metric-sub" id="mRevSub"></div></div>
     <div class="metric"><div class="metric-label">Прибыль</div><div class="metric-val" id="mProfit">—</div><div class="metric-sub" id="mProfitSub"></div></div>
     <div class="metric"><div class="metric-label">Наценка</div><div class="metric-val" id="mMarkup">—</div><div class="metric-sub">средняя по магазину</div></div>
@@ -174,9 +147,9 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
   </div>
 
   <div class="chart-card">
-    <div class="card-title">Выручка по дням</div>
-    <div style="position:relative;height:200px">
-      <canvas id="chartRevenue" role="img" aria-label="Выручка по дням"></canvas>
+    <div class="card-title">Топ товаров — выручка vs себестоимость</div>
+    <div style="position:relative;height:220px">
+      <canvas id="chartRevenue" role="img" aria-label="Топ товаров выручка и себестоимость"></canvas>
     </div>
   </div>
 
@@ -266,14 +239,13 @@ async function loadData() {
   const toStr = to + 'T23:59:59';
 
   try {
-    setStatus('spin', 'Загружаем прибыльность по товарам...');
-    const [byProduct, byDay, stock] = await Promise.all([
+    const [byProduct, stock] = await Promise.all([
       apiFetch('report/profit/byproduct', { momentFrom: fromStr, momentTo: toStr, limit: 100 }),
-      apiFetch('report/sales/byday', { momentFrom: fromStr, momentTo: toStr }),
       apiFetch('report/stock/all', { limit: 50, filter: 'stockMode=positiveOnly' }),
     ]);
 
     const rows = byProduct.rows || [];
+    const DIV = 100; // МойСклад хранит суммы в тийынах
 
     let totalRev = 0, totalCost = 0, totalQty = 0;
     rows.forEach(r => {
@@ -282,9 +254,8 @@ async function loadData() {
       totalQty += (r.sellQuantity || 0);
     });
 
-    // МойСклад возвращает суммы в копейках
-    const div = 100;
-    totalRev /= div; totalCost /= div;
+    totalRev /= DIV;
+    totalCost /= DIV;
     const totalProfit = totalRev - totalCost;
     const markup = totalCost > 0 ? (totalProfit / totalCost * 100) : 0;
     const avgPrice = totalQty > 0 ? totalRev / totalQty : 0;
@@ -299,91 +270,60 @@ async function loadData() {
     document.getElementById('mAvg').textContent = fmt(avgPrice);
     document.getElementById('mCost').textContent = fmtK(totalCost);
 
-    // Chart by day
-    const dayRows = (byDay.rows || []);
-    if (dayRows.length > 0) {
-      const labels = dayRows.map(r => (r.date || '').slice(5, 10));
-      const vals = dayRows.map(r => Math.round((r.revenue || 0) / 100));
-      if (revenueChart) revenueChart.destroy();
-      revenueChart = new Chart(document.getElementById('chartRevenue'), {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [{
-            label: 'Выручка',
-            data: vals,
-            backgroundColor: 'rgba(124,92,252,0.6)',
-            borderColor: 'rgba(124,92,252,1)',
-            borderWidth: 1,
-            borderRadius: 4,
-          }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => fmt(c.raw) + ' тг' } } },
-          scales: {
-            x: { ticks: { color: '#555568', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-            y: { ticks: { color: '#555568', font: { size: 10 }, callback: v => fmtK(v) }, grid: { color: 'rgba(255,255,255,0.04)' } }
-          }
-        }
-      });
-    }
-
-    // Normalize rows
     const normRows = rows.map(r => ({
       name: r.assortment?.name || '—',
       qty: r.sellQuantity || 0,
-      rev: (r.sellSum || 0) / div,
-      cost: (r.buySum || 0) / div,
+      rev: (r.sellSum || 0) / DIV,
+      cost: (r.buySum || 0) / DIV,
       markup: r.buySum > 0 ? ((r.sellSum - r.buySum) / r.buySum * 100) : 0,
     }));
 
-    // Top by revenue
-    const topRev = [...normRows].sort((a, b) => b.rev - a.rev).slice(0, 8);
-    makeList('topRevenue', topRev,
-      i => i + 1,
-      p => p.name,
-      p => p.rev,
-      p => fmtK(p.rev) + ' ₸',
-      p => p.qty + ' шт',
-      p => {
-        const m = Math.round(p.markup);
-        return m >= 80 ? { cls: 'green', text: m + '%' } : m >= 50 ? { cls: 'amber', text: m + '%' } : { cls: 'red', text: m + '%' };
+    // Chart top 8
+    const top8 = [...normRows].sort((a, b) => b.rev - a.rev).slice(0, 8);
+    if (revenueChart) revenueChart.destroy();
+    revenueChart = new Chart(document.getElementById('chartRevenue'), {
+      type: 'bar',
+      data: {
+        labels: top8.map(p => p.name.length > 18 ? p.name.slice(0, 18) + '…' : p.name),
+        datasets: [
+          { label: 'Выручка', data: top8.map(p => Math.round(p.rev)), backgroundColor: 'rgba(124,92,252,0.7)', borderRadius: 4 },
+          { label: 'Себест.', data: top8.map(p => Math.round(p.cost)), backgroundColor: 'rgba(92,156,252,0.4)', borderRadius: 4 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, labels: { color: '#8888a0', font: { size: 10 }, boxWidth: 10 } },
+          tooltip: { callbacks: { label: c => c.dataset.label + ': ' + fmt(c.raw) + ' тг' } }
+        },
+        scales: {
+          x: { ticks: { color: '#555568', font: { size: 9 }, maxRotation: 35 }, grid: { color: 'rgba(255,255,255,0.04)' } },
+          y: { ticks: { color: '#555568', font: { size: 10 }, callback: v => fmtK(v) }, grid: { color: 'rgba(255,255,255,0.04)' } }
+        }
       }
+    });
+
+    makeList('topRevenue', [...normRows].sort((a,b)=>b.rev-a.rev).slice(0,8),
+      i=>i+1, p=>p.name, p=>p.rev, p=>fmtK(p.rev)+' ₸', p=>p.qty+' шт',
+      p=>{const m=Math.round(p.markup);return m>=80?{cls:'green',text:m+'%'}:m>=50?{cls:'amber',text:m+'%'}:{cls:'red',text:m+'%'};}
     );
 
-    // Top by qty
-    const topQ = [...normRows].sort((a, b) => b.qty - a.qty).slice(0, 8);
-    makeList('topQty', topQ,
-      i => i + 1,
-      p => p.name,
-      p => p.qty,
-      p => p.qty + ' шт',
-      p => fmtK(p.rev) + ' ₸',
-      null
+    makeList('topQty', [...normRows].sort((a,b)=>b.qty-a.qty).slice(0,8),
+      i=>i+1, p=>p.name, p=>p.qty, p=>p.qty+' шт', p=>fmtK(p.rev)+' ₸', null
     );
 
-    // Top markup
-    const topM = [...normRows].filter(p => p.cost > 0).sort((a, b) => b.markup - a.markup).slice(0, 8);
-    makeList('topMarkup', topM,
-      i => i + 1,
-      p => p.name,
-      p => p.markup,
-      p => Math.round(p.markup) + '%',
-      p => fmtK(p.rev) + ' ₸',
-      null
+    makeList('topMarkup', [...normRows].filter(p=>p.cost>0).sort((a,b)=>b.markup-a.markup).slice(0,8),
+      i=>i+1, p=>p.name, p=>p.markup, p=>Math.round(p.markup)+'%', p=>fmtK(p.rev)+' ₸', null
     );
 
-    // Low stock
-    const stockRows = (stock.rows || []).filter(r => (r.stock || 0) < 5 && (r.stock || 0) >= 0).slice(0, 8);
+    const stockRows = (stock.rows||[]).filter(r=>(r.stock||0)<5&&(r.stock||0)>=0).slice(0,8);
     const stEl = document.getElementById('lowStock');
     if (stockRows.length) {
-      stEl.innerHTML = stockRows.map((r, i) => `
-        <div class="top-row">
-          <span class="top-rank">${i + 1}</span>
-          <span class="top-name" title="${r.name || '—'}">${r.name || '—'}</span>
-          <span class="badge ${(r.stock || 0) === 0 ? 'red' : 'amber'}">${Math.round(r.stock || 0)} шт</span>
-        </div>`).join('');
+      stEl.innerHTML = stockRows.map((r,i)=>`<div class="top-row">
+        <span class="top-rank">${i+1}</span>
+        <span class="top-name" title="${r.name||'—'}">${r.name||'—'}</span>
+        <span class="badge ${(r.stock||0)===0?'red':'amber'}">${Math.round(r.stock||0)} шт</span>
+      </div>`).join('');
     } else {
       stEl.innerHTML = '<div class="empty">Всё в норме (>5 шт)</div>';
     }
